@@ -1,25 +1,17 @@
+import { A as emberArray } from '@ember/array';
+import { isEmpty } from '@ember/utils';
+import { run } from '@ember/runloop';
+import EmberObject, { set, get } from '@ember/object';
+import { setOwner, getOwner } from '@ember/application';
 import Ember from 'ember';
 import { moduleFor, test } from 'ember-qunit';
 import EmberValidations, { validator } from 'ember-validations';
 import Base from 'ember-validations/validators/base';
+import Controller from '@ember/controller';
 
 let user;
 let User;
 let promise;
-
-const {
-  A: emberArray,
-  ArrayController,
-  K,
-  Object: EmberObject,
-  ObjectController,
-  get,
-  getOwner,
-  isEmpty,
-  run,
-  set,
-  setOwner
-} = Ember;
 
 moduleFor('object:user', 'Validate test', {
   integration: true,
@@ -96,81 +88,77 @@ test('it can be mixed into an Ember Object', function(assert) {
   assert.equal(get(being, 'isValid'), false);
 });
 
-if (ObjectController) {
-  test('can be mixed into an controller', function(assert) {
-    let Controller;
-    let controller;
-    let user;
+test('can be mixed into an controller', function(assert) {
+  let ControllerClass;
+  let controller;
+  let user;
 
-    Controller = ObjectController.extend(EmberValidations, {
-      validations: {
-        name: {
-          presence: true
-        }
+  ControllerClass = Controller.extend(EmberValidations, {
+    validations: {
+      name: {
+        presence: true
       }
-    });
-
-    this.registry.register('controller:user', Controller);
-
-    run(() => controller = this.container.lookupFactory('controller:user').create());
-    assert.equal(get(controller, 'isValid'), false);
-
-    user = EmberObject.create();
-    run(() => set(controller, 'model', user));
-    assert.equal(get(controller, 'isValid'), false);
-
-    run(() => set(user, 'name', 'Brian'));
-    assert.equal(get(controller, 'isValid'), true);
-  });
-}
-
-if (ObjectController && ArrayController) {
-  moduleFor('controller:user', 'Array controller', {
-    integration: true
+    }
   });
 
-  test('can be mixed into an array controller', function(assert) {
-    let Controller;
-    let controller;
-    let user;
-    let UserController;
+  this.registry.register('controller:user', Controller);
 
-    UserController = ObjectController.extend(EmberValidations, {
-      validations: {
-        name: {
-          presence: true
-        }
+  run(() => controller = this.container.lookupFactory('controller:user').create());
+  assert.equal(get(controller, 'isValid'), false);
+
+  user = EmberObject.create();
+  run(() => set(controller, 'model', user));
+  assert.equal(get(controller, 'isValid'), false);
+
+  run(() => set(user, 'name', 'Brian'));
+  assert.equal(get(controller, 'isValid'), true);
+});
+
+moduleFor('controller:user', 'Array controller', {
+  integration: true
+});
+
+test('can be mixed into an array controller', function(assert) {
+  let Controller;
+  let controller;
+  let user;
+  let UserController;
+
+  UserController = Controller.extend(EmberValidations, {
+    validations: {
+      name: {
+        presence: true
       }
-    });
-
-    this.registry.register('controller:user', UserController);
-
-    Controller = ArrayController.extend(EmberValidations, {
-      itemController: 'User',
-      validations: {
-        '[]': true
-      }
-    });
-
-    this.registry.register('controller:list', Controller);
-
-    run(() => controller = this.container.lookupFactory('controller:list').create());
-
-    assert.equal(get(controller, 'isValid'), true);
-
-    user = EmberObject.create();
-
-    run(() => controller.pushObject(user));
-
-    assert.equal(get(controller, 'isValid'), false);
-    run(() => set(user, 'name', 'Brian'));
-    assert.equal(get(controller, 'isValid'), true);
-    run(() => set(user, 'name', undefined));
-    assert.equal(get(controller, 'isValid'), false);
-    run(() => get(controller, 'content').removeObject(user));
-    assert.equal(get(controller, 'isValid'), true);
+    }
   });
-}
+
+  this.registry.register('controller:user', UserController);
+
+  Controller = ArrayController.extend(EmberValidations, {
+    itemController: 'User',
+    validations: {
+      '[]': true
+    }
+  });
+
+  this.registry.register('controller:list', Controller);
+
+  run(() => controller = this.container.lookupFactory('controller:list').create());
+
+  assert.equal(get(controller, 'isValid'), true);
+
+  user = EmberObject.create();
+
+  run(() => controller.pushObject(user));
+
+  assert.equal(get(controller, 'isValid'), false);
+  run(() => set(user, 'name', 'Brian'));
+  assert.equal(get(controller, 'isValid'), true);
+  run(() => set(user, 'name', undefined));
+  assert.equal(get(controller, 'isValid'), false);
+  run(() => get(controller, 'content').removeObject(user));
+  assert.equal(get(controller, 'isValid'), true);
+});
 
 let Profile;
 let profile;
