@@ -6,6 +6,7 @@ import EmberObject, { set, get } from '@ember/object';
 
 export default EmberObject.extend({
   init() {
+    this._super(...arguments);
     set(this, 'errors', emberArray());
     this.dependentValidationKeys = emberArray();
     this.conditionals = {
